@@ -11,11 +11,11 @@ export default () => {
           Home
         </Menu.Item>
       </Link>
-      <Link to="/things">
+      <Link to="/api/departments">
         <Menu.Item
-          name='Things'
+          name='departments'
         >
-          Things
+          See all Departments
         </Menu.Item>
       </Link>
     </Menu>
