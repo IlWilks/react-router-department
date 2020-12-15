@@ -8,6 +8,18 @@
 
 require "faker"
 
-Thing.create(name: "Tester")
-Thing.create(name: "")
-Thing.create(name: "Dinglus")
+items = ["bread", "cheese", "milk", "toothbroush"]
+
+3.times do
+  d = Department.create(
+    name: Faker::Company.industry,
+  )
+  5.times do
+    d.items.create(
+      name: items.sample,
+      price: 10,
+    )
+  end
+end
+
+puts "seeded with 3 departments - 5 items each"
