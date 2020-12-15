@@ -11,7 +11,7 @@ export default () => {
           Home
         </Menu.Item>
       </Link>
-      <Link to="/api/departments">
+      <Link to="/departments">
         <Menu.Item
           name='departments'
         >
