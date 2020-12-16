@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export default (props) => {
   const [name, setName] = useState("");
-  const handleSubmit = (e) => {
+  const handleSubmit = () => {
     props.addDepartment({ name });
     setName("");
   };

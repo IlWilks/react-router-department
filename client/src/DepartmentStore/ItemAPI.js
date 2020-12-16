@@ -1,7 +1,11 @@
 import Axios from "axios";
-import {Button, Header} from "semantic-ui-react";
+import {Button, Card, Header} from "semantic-ui-react";
 import {useParams} from "react-router-dom"
 import {Link} from 'react-router-dom';
+import { useAxiosOnMount } from "../Hooks/AxiosCallHooks";
+import Item from "./Item";
+import ItemForm from "../components/ItemForm";
+import SpinnerBasic from "../components/SpinnerBasic";
 
 let dummyItem = {
   name: "banana",
@@ -16,14 +20,8 @@ let i = {
 export default () => {
   let { departmentId } = useParams();
 
-  const readItems = async () => {
-    try {
-      let res = await Axios.get(`/api/departments/${departmentId}/items`)
-      console.log(res.data)
-    } catch (err) {
-      console.log(err)
-    }
-  };
+  const [items, itemsLoading, setItems] = useAxiosOnMount(`/api/departments/${departmentId}/items`)
+
   
   const readItem = async (itemId) => {
     try{
@@ -36,17 +34,17 @@ export default () => {
   
   const createItem = async (item) => {
     try {
+      setItems([...items,item])
       let res = await Axios.post(
         `/api/departments/${departmentId}/items/`,
-        item
-        );
-        console.log(res.data);
+        item);
     }catch (err) {}
   };
   const updateItem = async (id, item) => {
     try {
       let res = await Axios.put(`/api/departments/${departmentId}/items/${id}`, item)
-      console.log(res.data)
+      let newItem = items.map((i) => (i.id !== id ? i : res.data));
+      setItems(newItem);
     } catch (err) {
       console.log(err)
     }
@@ -55,16 +53,26 @@ export default () => {
     try {
       let res = await Axios.delete(`/api/departments/${departmentId}/items/${id}`);
       console.log(res.data);
+      let newItems = items.filter((i) => i.id !== res.data.id);
+      setItems(newItems);
     }catch (err) {}
   };
 
+  if (itemsLoading) {
+    return <SpinnerBasic/>
+  }
+
   return (
     <>
-      <Button onClick={readItems}>Read Items</Button>
-      <Button onClick={() => readItem(7)}>Read Item 7</Button>
-      <Button onClick={() => createItem(dummyItem)}>Create Item</Button>
-      <Button onClick={() => updateItem(6, i)}>Update Item 6</Button>
-      <Button onClick={() => deleteItem(8)}>Delete item 8</Button>
+      <Header>Items</Header>
+      <ItemForm addItem={createItem}/>
+      {items && 
+        <Card.Group>
+          {items.map(i=> <Item key={i.id} {...i}
+                                deleteItem={deleteItem}
+                                editItem={updateItem}/>)}
+        </Card.Group>
+      }
     </>
   )
 }

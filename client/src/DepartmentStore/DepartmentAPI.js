@@ -1,8 +1,9 @@
 import Axios from "axios";
-import {Button, Header} from "semantic-ui-react";
+import {Button, Form, Header} from "semantic-ui-react";
 import {useState, useEffect} from "react";
 import {Link} from 'react-router-dom';
 import DepartmentForm from "../components/DepartmentForm";
+import SpinnerBasic from "../components/SpinnerBasic";
 
 let dummyDepartment = {
   name: "test",
@@ -15,6 +16,9 @@ let dummyItem = {
 
 export default () => {
   const [departments, setDepartments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [name, setName] = useState('')
 
 
   useEffect(()=> {
@@ -25,6 +29,7 @@ export default () => {
     try {
       let res = await Axios.get("/api/departments")
       setDepartments(res.data)
+      setLoading(false)
     } catch (err) {
       console.log(err)
     }
@@ -59,7 +64,8 @@ export default () => {
 
   const deleteDepartment = async (id) => {
     try {
-      let res = await Axios.delete(`/api/departments/${id}`);
+      
+    let res = await Axios.delete(`/api/departments/${id}`);
       let newDepartment = departments.filter((d) => d.id !== res.data.id);
       setDepartments(newDepartment);
     } catch (err) {
@@ -67,19 +73,26 @@ export default () => {
     }
   }
 
+  if (loading) {
+    return <SpinnerBasic/>
+  }
   return (
     <>
     <Header>Departments</Header>
-    {/* <Button onClick={() => readDepartment(2)}>Read Department</Button> */}
-    {/* <Button onClick={() => createDepartment(dummyDepartment)}>New Department</Button> */}
-    {/* <Button onClick={() => deleteDepartment(5)}>Delete Department</Button> */}
-    {/* <Button onClick={() => updateDepartment(1, dummyDepartment)}>Update Department</Button> */}
     <DepartmentForm addDepartment={createDepartment}/>
     {departments.map((d) => (
       <>
+        <br/>
         <Link to={`/itemAPI/${d.id}`}>
-          <p>{d.name}</p>
+          <h1>{d.name}</h1>
         </Link>
+        {showForm &&
+            <Form onSubmit={() => (setShowForm(false), updateDepartment(d.id, {name}))}>
+              <Form.Input value={name} onChange={(e) => setName(e.target.value)} />
+              <Form.Button>Edit</Form.Button>
+            </Form>
+        }
+        <Button onClick={() => setShowForm(!showForm)}>Update Department</Button>
         <Button onClick={() => deleteDepartment(d.id)}>Delete Department</Button>
       </>
     ))}
