@@ -4,22 +4,13 @@ import {useState, useEffect} from "react";
 import {Link} from 'react-router-dom';
 import DepartmentForm from "../components/DepartmentForm";
 import SpinnerBasic from "../components/SpinnerBasic";
-
-let dummyDepartment = {
-  name: "test",
-}
-let dummyItem = {
-  name: "test",
-  price: 100,
-}
-
+import Department from "./Department";
 
 export default () => {
   const [departments, setDepartments] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
-
 
   useEffect(()=> {
     readDepartments();
@@ -51,11 +42,11 @@ export default () => {
       console.log(err);
     }
   }
-  
+
   const updateDepartment = async (id, department) => {
     try {
       let res = await Axios.put(`/api/departments/${id}`, department);
-      let newDepartment = departments.map((d) => (d.id !== id ? d : res.data));
+      let newDepartment = departments.map((d) => (d.id !== id ? d : department));
       setDepartments(newDepartment);
     } catch (err) {
       console.log(err);
@@ -64,38 +55,37 @@ export default () => {
 
   const deleteDepartment = async (id) => {
     try {
-      
-    let res = await Axios.delete(`/api/departments/${id}`);
-      let newDepartment = departments.filter((d) => d.id !== res.data.id);
-      setDepartments(newDepartment);
+      let res = await Axios.delete(`/api/departments/${id}`);
+      let filterDepartment = departments.filter((d) => d.id !== res.data.id);
+      setDepartments(filterDepartment);
     } catch (err) {
       console.log(err);
     }
   }
 
-  if (loading) {
-    return <SpinnerBasic/>
-  }
-  return (
-    <>
-    <Header>Departments</Header>
-    <DepartmentForm addDepartment={createDepartment}/>
-    {departments.map((d) => (
+  const renderBody =  () => {
+    if (loading) return <SpinnerBasic/>;
+    return departments.map((d) => (
       <>
-        <br/>
         <Link to={`/itemAPI/${d.id}`}>
           <h1>{d.name}</h1>
         </Link>
-        {showForm &&
-            <Form onSubmit={() => (setShowForm(false), updateDepartment(d.id, {name}))}>
-              <Form.Input value={name} onChange={(e) => setName(e.target.value)} />
-              <Form.Button>Edit</Form.Button>
-            </Form>
-        }
-        <Button onClick={() => setShowForm(!showForm)}>Update Department</Button>
-        <Button onClick={() => deleteDepartment(d.id)}>Delete Department</Button>
+        <Department
+          editDepartment={updateDepartment}
+          deleteDepartment={deleteDepartment}
+          key={`d-${d.id}`}
+          {...d}
+        />
       </>
-    ))}
+    ));
+  };
+
+  return (
+    <>
+      <Header>Departments</Header>
+      <DepartmentForm addDepartment={createDepartment}/>
+      <Header>Click on a Department to see Department Items</Header>
+      {renderBody()}
     </>
   )
 } 

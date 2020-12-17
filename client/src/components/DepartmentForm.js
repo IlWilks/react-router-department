@@ -10,8 +10,10 @@ export default (props) => {
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Input
+        required
         label={"Department"}
         value={name}
+        placeholder="Type Department Name here"
         onChange={(e) => {
           setName(e.target.value);
         }}
